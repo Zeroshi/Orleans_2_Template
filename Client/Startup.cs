@@ -32,7 +32,7 @@ namespace Client
             var orleansClient = CreateOrleansClient();
             services.AddSingleton<IClusterClient>(orleansClient);
             services.AddCouchbase(Configuration.GetSection("Couchbase"))
-                .AddCouchbaseBucket<ICouchbaseBucket>("travel-sample", "password");
+                .AddCouchbaseBucket<ICouchbaseBucket>("Test1", "1loveCIS!");
 
             services.AddMvc();
 

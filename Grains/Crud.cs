@@ -1,23 +1,25 @@
 ﻿using Contracts;
-using Couchbase.N1QL;
 using Orleans;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Couchbase;
 using Couchbase.Core;
+using Castle.Core.Logging;
 
 namespace Grains
 {
-    public class Crud : Grain, ICrud
+    public class Crud : Grain, ICrudGrain
     {
         private readonly IBucket _bucket;
         private readonly string _key;
+        private readonly ILogger _logger;
 
         public Crud(ICouchbaseBucket bucket, string key, ILogger logger)
         {
             _bucket = bucket.GetBucket();
             _key = key;
+            _logger = logger;
         }
 
         public virtual Task<bool> Delete(string item)
@@ -30,6 +32,7 @@ namespace Grains
             catch (Exception ex)
             {
                 result = false;
+                _logger.Error(ex.InnerException.Message);
             }
             return Task.FromResult<bool>(result);
         }
@@ -70,6 +73,7 @@ namespace Grains
             }
             catch (Exception ex)
             {
+                _logger.Error(ex.InnerException.Message);
                 return Task.FromResult<string>(string.Empty);
             }
         }
@@ -84,6 +88,7 @@ namespace Grains
             catch (Exception ex)
             {
                 result = false;
+                _logger.Error(ex.InnerException.Message);
             }
             return Task.FromResult<bool>(result);
         }

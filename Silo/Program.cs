@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using Contracts;
+using Microsoft.Extensions.Logging;
 using Orleans;
 using Orleans.Configuration;
 using Orleans.Hosting;
@@ -11,26 +12,47 @@ namespace Silo
 {
     public static class Program
     {
-        public static async Task Main(string[] args)
+        public static int Main(string[] args)
         {
-            var siloBuilder = new SiloHostBuilder()
+            return RunMainAsync().Result;
+        }
+
+        private static async Task<int> RunMainAsync()
+        {
+            try
+            {
+                var host = await StartSilo();
+                Console.WriteLine("Press Enter to terminate...");
+                Console.ReadLine();
+
+                await host.StopAsync();
+
+                return 0;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+                return 1;
+            }
+        }
+
+        private static async Task<ISiloHost> StartSilo()
+        {
+            // define the cluster configuration
+            var builder = new SiloHostBuilder()
                 .UseLocalhostClustering()
-                .UseDashboard(options => { })
                 .Configure<ClusterOptions>(options =>
                 {
                     options.ClusterId = "dev";
-                    options.ServiceId = "Orleans2GettingOrganised";
+                    options.ServiceId = "HelloWorldApp";
                 })
-                .Configure<EndpointOptions>(options =>
-                    options.AdvertisedIPAddress = IPAddress.Loopback)
+                .Configure<EndpointOptions>(options => options.AdvertisedIPAddress = IPAddress.Loopback)
+                .ConfigureApplicationParts(parts => parts.AddApplicationPart(typeof(ICrudGrain).Assembly).WithReferences())
                 .ConfigureLogging(logging => logging.AddConsole());
 
-            using (var host = siloBuilder.Build())
-            {
-                await host.StartAsync();
-
-                Console.ReadLine();
-            }
+            var host = builder.Build();
+            await host.StartAsync();
+            return host;
         }
     }
 }
