@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace Contracts
 {
-    public interface ICrud : IGrainWithIntegerKey
+    public interface ICrudGrain : IGrainWithIntegerKey
     {
         Task<bool> Insert(string item);
 
